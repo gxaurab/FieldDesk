@@ -1,77 +1,51 @@
-# React + TypeScript + Vite
+# FieldDesk
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Install and run
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open the local URL Vite prints in the terminal. A production check is available with `npm run build`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Test users and organizations
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Use the **User** selector in the top bar to change the simulated session. Super Admin and Auditor sessions also receive an **Organization** selector; everyone else is fixed to their organization.
 
-```
+| User | Role | Organization |
+| --- | --- | --- |
+| Sarah Karki | Super Admin | Platform-level |
+| Prakash Shrestha | Auditor | Platform-level |
+| Anita Gurung | Organization Admin | Nvdia Corp |
+| Bikash Thapa | Team Lead | Nvdia Corp |
+| Sita Rai | Agent | Nvdia Corp |
+| Rajesh Adhikari | Organization Admin | Wallmart Corp |
+| Nisha Maharjan | Team Lead | Wallmart Corp |
+| Kiran Tamang | Agent | Wallmart Corp |
+| Deepak Basnet | Organization Admin | Global IME Bank |
+| Manisha Poudel | Team Lead | Global IME Bank |
+| Suman Lama | Agent | Global IME Bank |
+
+Agents only see tickets assigned to themselves. Switch to an Agent and a different organization to confirm that no tickets outside that user's organization are exposed.
+
+## Permissions
+
+`PermissionContext` owns a `Record<Role, Permission[]>` matrix in React state. All permission-gated navigation, routes, and ticket controls use the `usePermission` hook, so the Permission Management table updates access immediately without a reload.
+
+The matrix is available to Sarah Karki on **Permissions**. Toggle a checkbox, then visit the relevant navigation item or action to see it disappear or become restricted straight away.
+
+## Key technical decisions
+
+- Permission capability and organization scope are separate. `usePermission` answers whether an action is allowed; `useScopedTickets` applies the active organization and the Agent-only assignment filter.
+- The Permission Management screen is the deliberate, documented exception to role-comparison avoidance: it checks for Super Admin directly because it manages the permissions that would otherwise gate itself.
+- Components access mock data only through `src/services`, whose calls include a simulated delay. This keeps loading behavior consistent.
+- The session provider always selects an active organization, including for platform users, which keeps ticket requests explicitly scoped.
+
+## Known limitations
+
+- This is mock-data only: there is no authentication, backend, or persistence after refresh.
+- Ticket edits, creates, assignments, and deletes are in-memory for the current browser session.
+- Permission changes reset on refresh.
+- Organization management and staff role editing are intentionally not implemented; the directory is read-only.
+- Styling is intentionally lightweight and focused on clarity over a complete design system.
