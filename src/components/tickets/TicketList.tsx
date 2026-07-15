@@ -1,22 +1,23 @@
 import { useState } from "react";
 import { type Ticket } from "../../types/ticket";
-import { useScopedTickets } from "../../hooks/useScopedTickets";
 import { deleteTicket } from "../../services/ticketService";
 import { TicketRow } from "./TicketRow";
 
 interface TicketListProps {
+  tickets: Ticket[];
+  loading: boolean;
+  refetch: () => void;
   onSelect: (ticket: Ticket) => void;
   onDeleted: (id: string) => void;
 }
 
-export function TicketList({ onSelect, onDeleted }: TicketListProps) {
-  const { tickets, loading, refetch } = useScopedTickets();
+export function TicketList({ tickets, loading, refetch, onSelect, onDeleted }: TicketListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function handleDelete(id: string) {
     setDeletingId(id);
     await deleteTicket(id);
-    await refetch();
+    refetch();
     setDeletingId(null);
     onDeleted(id);
   }

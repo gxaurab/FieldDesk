@@ -1,6 +1,23 @@
-import { organizations } from "../../data/organizations";
+import { useEffect, useState } from "react";
+import { type Organization } from "../../types/organization";
+import { fetchOrganizations } from "../../services/organizationService";
 
 export function OrgList() {
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadOrganizations() {
+      setOrganizations(await fetchOrganizations());
+      setLoading(false);
+    }
+    void loadOrganizations();
+  }, []);
+
+  if (loading) {
+    return <p className="py-8 text-center text-sm text-gray-500">Loading organizations...</p>;
+  }
+
   return (
     <table className="w-full border border-gray-100 rounded-lg overflow-hidden mt-6">
       <thead className="bg-gray-50 text-xs text-gray-500 uppercase">

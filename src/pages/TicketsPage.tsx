@@ -15,13 +15,12 @@ type ViewMode = "detail" | "create" | "edit" | null;
 export function TicketsPage() {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>(null);
-  const [listKey, setListKey] = useState(0);
 
   const canCreate = usePermission(Permission.CREATE_TICKETS);
   const canViewAnalytics = usePermission(Permission.VIEW_ANALYTICS);
 
   // reused for both the dashboard widgets and the list below, same scoped data
-  const { tickets } = useScopedTickets();
+  const { tickets, loading, refetch } = useScopedTickets();
 
   function handleSelect(ticket: Ticket) {
     setSelectedTicket(ticket);
@@ -50,9 +49,9 @@ export function TicketsPage() {
     } else {
       await createTicket(ticket);
     }
+    refetch();
     setSelectedTicket(null);
     setViewMode(null);
-    setListKey((k) => k + 1);
   }
 
   function handleClose() {
@@ -82,7 +81,13 @@ export function TicketsPage() {
           )}
         </div>
 
-        <TicketList key={listKey} onSelect={handleSelect} onDeleted={handleDeleted} />
+        <TicketList
+          tickets={tickets}
+          loading={loading}
+          refetch={refetch}
+          onSelect={handleSelect}
+          onDeleted={handleDeleted}
+        />
 
         {viewMode === "detail" && selectedTicket && (
           <TicketDetail ticket={selectedTicket} onClose={handleClose} onEdit={handleEdit} />

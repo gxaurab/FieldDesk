@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type Ticket, TicketStatus, TicketPriority } from "../../types/ticket";
-import { users } from "../../data/users";
+import { type User } from "../../types/user";
 import { useSession } from "../../context/SessionContext";
 import { usePermission } from "../../hooks/usePermission";
 import { Permission } from "../../types/permission";
+import { fetchUsers } from "../../services/userService";
 
 interface TicketFormProps {
   existingTicket?: Ticket;
@@ -16,14 +17,26 @@ export function TicketForm({ existingTicket, onSubmit, onCancel }: TicketFormPro
   const isEditing = !!existingTicket;
 
   const canAssign = usePermission(Permission.ASSIGN_TICKETS);
+  const canEditTitleAndPriority = usePermission(Permission.EDIT_TICKET_TITLE_AND_PRIORITY);
+  const restrictTitleAndPriority = isEditing && !canEditTitleAndPriority;
 
   const [title, setTitle] = useState(existingTicket?.title ?? "");
   const [description, setDescription] = useState(existingTicket?.description ?? "");
   const [status, setStatus] = useState<TicketStatus>(existingTicket?.status ?? TicketStatus.OPEN);
   const [priority, setPriority] = useState<TicketPriority>(existingTicket?.priority ?? TicketPriority.MEDIUM);
   const [assignedTo, setAssignedTo] = useState<string>(existingTicket?.assignedTo ?? "");
+  const [orgUsers, setOrgUsers] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
 
-  const orgUsers = users.filter((u) => u.organizationId === activeOrgId);
+  useEffect(() => {
+    async function loadOrgUsers() {
+      if (!activeOrgId) return;
+      setLoadingUsers(true);
+      setOrgUsers(await fetchUsers(activeOrgId));
+      setLoadingUsers(false);
+    }
+    void loadOrgUsers();
+  }, [activeOrgId]);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -53,7 +66,8 @@ export function TicketForm({ existingTicket, onSubmit, onCancel }: TicketFormPro
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm"
+          disabled={restrictTitleAndPriority}
+          className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm disabled:bg-gray-50 disabled:text-gray-400"
         />
       </div>
 
@@ -86,7 +100,8 @@ export function TicketForm({ existingTicket, onSubmit, onCancel }: TicketFormPro
           <select
             value={priority}
             onChange={(e) => setPriority(e.target.value as TicketPriority)}
-            className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm"
+            disabled={restrictTitleAndPriority}
+            className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm disabled:bg-gray-50 disabled:text-gray-400"
           >
             {Object.values(TicketPriority).map((p) => (
               <option key={p} value={p}>{p}</option>
@@ -102,10 +117,10 @@ export function TicketForm({ existingTicket, onSubmit, onCancel }: TicketFormPro
         <select
           value={assignedTo}
           onChange={(e) => setAssignedTo(e.target.value)}
-          disabled={!canAssign}
+          disabled={!canAssign || loadingUsers}
           className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm disabled:bg-gray-50 disabled:text-gray-400"
         >
-          <option value="">Unassigned</option>
+          <option value="">{loadingUsers ? "Loading staff..." : "Unassigned"}</option>
           {orgUsers.map((u) => (
             <option key={u.id} value={u.id}>{u.firstName} {u.lastName}</option>
           ))}

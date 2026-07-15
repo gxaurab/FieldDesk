@@ -1,8 +1,21 @@
+import { useEffect, useState } from "react";
 import { useSession } from "../../context/SessionContext";
-import { users } from "../../data/users";
+import { type User } from "../../types/user";
+import { fetchUsers } from "../../services/userService";
 
 export function UserSwitcher() {
   const { currentUser, switchUser } = useSession();
+  const [users, setUsers] = useState<User[]>([currentUser]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadUsers() {
+      const allUsers = await fetchUsers();
+      setUsers(allUsers);
+      setLoading(false);
+    }
+    void loadUsers();
+  }, []);
 
   return (
     <label className="relative block min-w-52 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2">
@@ -10,6 +23,7 @@ export function UserSwitcher() {
       <select
         value={currentUser.id}
         onChange={(e) => switchUser(e.target.value)}
+        disabled={loading}
         className="mt-0.5 w-full cursor-pointer appearance-none bg-transparent pr-6 text-sm font-semibold text-slate-700 outline-none"
       >
         {users.map((u) => (

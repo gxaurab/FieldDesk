@@ -10,6 +10,7 @@ export function StatCards({ tickets }: StatCardsProps) {
     { label: "Open", value: tickets.filter((t) => t.status === TicketStatus.OPEN).length, color: "bg-blue-500" },
     { label: "In progress", value: tickets.filter((t) => t.status === TicketStatus.IN_PROGRESS).length, color: "bg-amber-500" },
     { label: "Resolved", value: tickets.filter((t) => t.status === TicketStatus.RESOLVED).length, color: "bg-green-500" },
+    { label: "Closed", value: tickets.filter((t) => t.status === TicketStatus.CLOSED).length, color: "bg-slate-500" },
   ];
 
   return (
