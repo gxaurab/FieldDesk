@@ -42,8 +42,8 @@ export function TicketForm({ existingTicket, onSubmit, onCancel }: TicketFormPro
   }
 
   return (
-    <form onSubmit={handleSubmit} className="border border-gray-200 rounded-lg p-6 mt-4 space-y-4">
-      <h2 className="text-lg font-medium text-gray-800">
+    <form onSubmit={handleSubmit} className="w-full space-y-4 rounded-xl border border-gray-200 bg-white p-6 shadow-xl">
+      <h2 id="ticket-form-title" className="text-lg font-medium text-gray-800">
         {isEditing ? "Edit ticket" : "New ticket"}
       </h2>
 

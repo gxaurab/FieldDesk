@@ -63,11 +63,9 @@ export function TicketsPage() {
   return (
     <div className="p-6 space-y-6">
       {canViewAnalytics && (
-        <div className="space-y-4">
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-stretch">
+          <PriorityDonutChart tickets={tickets} />
           <StatCards tickets={tickets} />
-          <div className="max-w-sm">
-            <PriorityDonutChart tickets={tickets} />
-          </div>
         </div>
       )}
 
@@ -91,11 +89,25 @@ export function TicketsPage() {
         )}
 
         {(viewMode === "create" || viewMode === "edit") && (
-          <TicketForm
-            existingTicket={viewMode === "edit" ? selectedTicket ?? undefined : undefined}
-            onSubmit={handleFormSubmit}
-            onCancel={handleClose}
-          />
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+            role="presentation"
+            onMouseDown={handleClose}
+          >
+            <div
+              className="w-full max-w-2xl max-h-[calc(100vh-2rem)] overflow-y-auto"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="ticket-form-title"
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              <TicketForm
+                existingTicket={viewMode === "edit" ? selectedTicket ?? undefined : undefined}
+                onSubmit={handleFormSubmit}
+                onCancel={handleClose}
+              />
+            </div>
+          </div>
         )}
       </div>
     </div>
