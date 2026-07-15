@@ -30,27 +30,32 @@ export function TicketList({ onSelect, onDeleted }: TicketListProps) {
   }
 
   return (
-    <table className="w-full border border-gray-100 rounded-lg overflow-hidden">
-      <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
-        <tr>
-          <th className="text-left py-2 px-4">Title</th>
-          <th className="text-left py-2 px-4">Status</th>
-          <th className="text-left py-2 px-4">Priority</th>
-          <th className="text-left py-2 px-4">Assigned to</th>
-          <th className="text-right py-2 px-4">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {tickets.map((ticket) => (
-          <TicketRow
-            key={ticket.id}
-            ticket={ticket}
-            onSelect={onSelect}
-            onDelete={handleDelete}
-            isDeleting={deletingId === ticket.id}
-          />
-        ))}
-      </tbody>
-    </table>
+    <div className="rounded-lg border border-gray-100 bg-white">
+      <p className="px-4 pt-3 text-xs text-gray-400 sm:hidden">Swipe sideways to see all ticket details.</p>
+      <div className="overflow-x-auto touch-pan-x">
+        <table className="min-w-[760px] w-full">
+          <thead className="bg-gray-50 text-xs text-gray-500 uppercase">
+            <tr>
+              <th className="text-left py-2 px-4">Title</th>
+              <th className="text-left py-2 px-4">Status</th>
+              <th className="text-left py-2 px-4">Priority</th>
+              <th className="text-left py-2 px-4">Assigned to</th>
+              <th className="text-right py-2 px-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tickets.map((ticket) => (
+              <TicketRow
+                key={ticket.id}
+                ticket={ticket}
+                onSelect={onSelect}
+                onDelete={handleDelete}
+                isDeleting={deletingId === ticket.id}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
