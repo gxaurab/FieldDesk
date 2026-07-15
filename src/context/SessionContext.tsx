@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
-import { type User } from "../types/user";
+import { createContext, useContext, useState,type ReactNode } from "react";
+import {type User, Role } from "../types/user";
 import { users } from "../data/users";
+import { organizations } from "../data/organizations";
 
 interface SessionContextType {
   currentUser: User;
@@ -13,19 +14,19 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User>(users[0]);
-  const [activeOrgId, setActiveOrgId] = useState<string | null>(users[0].organizationId);
+  const [activeOrgId, setActiveOrgId] = useState<string | null>(
+    users[0].organizationId ?? organizations[0].id
+  );
 
   function switchUser(userId: string) {
     const user = users.find((u) => u.id === userId);
     if (!user) return;
     setCurrentUser(user);
-    // org-scoped users always default to their own org; platform users default to first org
-    setActiveOrgId(user.organizationId ?? "org-1");
+    setActiveOrgId(user.organizationId ?? organizations[0].id);
   }
 
   function switchOrg(orgId: string) {
-    // only meaningful for platform-level users; org-scoped users shouldn't call this
-    if (currentUser.organizationId === null) {
+    if (currentUser.role === Role.SUPER_ADMIN || currentUser.role === Role.AUDITOR) {
       setActiveOrgId(orgId);
     }
   }
@@ -37,7 +38,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
 export function useSession() {
   const context = useContext(SessionContext);
   if (!context) throw new Error("useSession must be used within a SessionProvider");
